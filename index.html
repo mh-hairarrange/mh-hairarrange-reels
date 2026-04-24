@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>@mh_hairarrange リール一覧</title>
+<style>
+  :root {
+    --bg: #fdfbf9;
+    --surface: #ffffff;
+    --ink: #2b2230;
+    --muted: #8a7f93;
+    --line: #efe6ed;
+    --accent: #e289a6;
+    --accent-soft: #fce7ee;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif; line-height: 1.55; }
+  header { padding: 28px 24px 16px; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(140%) blur(6px); }
+  .titlebar { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 20px; letter-spacing: .02em; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .count { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; transition: all .15s ease; }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .chip .n { color: var(--muted); margin-left: 6px; font-size: 12px; }
+  .chip.active .n { color: rgba(255,255,255,.8); }
+  main { padding: 24px; max-width: 1280px; margin: 0 auto; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; transition: transform .15s ease, box-shadow .15s ease; cursor: pointer; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(80, 40, 70, .08); }
+  .thumb-wrap { position: relative; aspect-ratio: 1/1; background: #f3ecf0; overflow: hidden; }
+  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .badge { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,.92); color: var(--ink); font-size: 11px; padding: 4px 9px; border-radius: 6px; font-weight: 500; letter-spacing: .02em; }
+  .body { padding: 12px 14px 14px; }
+  .name { font-size: 14px; font-weight: 600; line-height: 1.4; margin: 0 0 6px; }
+  .meta { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+  .meta a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .meta a:hover { text-decoration: underline; }
+  /* Modal */
+  .modal-back { position: fixed; inset: 0; background: rgba(30, 20, 30, .55); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+  .modal-back.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 16px; max-width: 760px; width: 100%; max-height: 90vh; overflow: auto; display: grid; grid-template-columns: minmax(260px, 360px) 1fr; gap: 0; }
+  .modal img { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--accent-soft); }
+  .modal-body { padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .modal-body .badge { position: static; display: inline-block; }
+  .modal-body h2 { margin: 0; font-size: 18px; line-height: 1.4; }
+  .modal-body .caption { font-size: 13px; color: #4a3d52; white-space: pre-wrap; line-height: 1.7; }
+  .modal-body a.ig { display: inline-block; background: var(--accent); color: white; text-align: center; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+  .modal-body a.ig:hover { filter: brightness(1.05); }
+  .close { position: absolute; top: 14px; right: 18px; background: rgba(255,255,255,.9); border: 1px solid var(--line); border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 14px; line-height: 1; }
+  @media (max-width: 640px) {
+    .modal { grid-template-columns: 1fr; max-height: 94vh; }
+    .modal img { aspect-ratio: 1/1; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="titlebar">
+    <h1>@mh_hairarrange リール一覧</h1>
+    <span class="sub">MIHO⁑簡単可愛い♡キッズヘアアレンジの秘訣</span>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="filters" id="filters"></div>
+</header>
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+<div class="modal-back" id="modalBack">
+  <div class="modal" id="modal" style="position: relative;">
+    <button class="close" id="close">×</button>
+    <img id="mImg" alt="">
+    <div class="modal-body">
+      <span class="badge" id="mBadge"></span>
+      <h2 id="mName"></h2>
+      <a class="ig" id="mLink" target="_blank" rel="noopener">Instagramで開く →</a>
+      <div class="caption" id="mCaption"></div>
+    </div>
+  </div>
+</div>
+<script>
+const CAT_ORDER = ["三つ編み","くるりんぱ","ポニーテール","ツイン","ローポニー","ハーフアップ","その他"];
+let allReels = [];
+let current = "ALL";
+
+async function load() {
+  const r = await fetch("reels.json");
+  allReels = await r.json();
+  renderFilters();
+  render();
+}
+
+function renderFilters() {
+  const counts = {};
+  for (const r of allReels) counts[r.category] = (counts[r.category] || 0) + 1;
+  const cats = CAT_ORDER.filter(c => counts[c]);
+  const host = document.getElementById("filters");
+  host.innerHTML = "";
+  const chip = (label, val, n) => {
+    const b = document.createElement("button");
+    b.className = "chip" + (current === val ? " active" : "");
+    b.innerHTML = `${label}<span class="n">${n}</span>`;
+    b.onclick = () => { current = val; renderFilters(); render(); };
+    host.appendChild(b);
+  };
+  chip("すべて", "ALL", allReels.length);
+  for (const c of cats) chip(c, c, counts[c]);
+}
+
+function render() {
+  const grid = document.getElementById("grid");
+  const list = current === "ALL" ? allReels : allReels.filter(r => r.category === current);
+  document.getElementById("count").textContent = `${list.length} / ${allReels.length} 件`;
+  grid.innerHTML = "";
+  for (const r of list) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="thumb-wrap">
+        <img src="${r.thumbnail}" alt="" loading="lazy">
+        <span class="badge">${r.category}</span>
+      </div>
+      <div class="body">
+        <p class="name">${escapeHtml(r.name)}</p>
+        <div class="meta"><span>リール</span><a href="${r.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Instagram →</a></div>
+      </div>`;
+    card.onclick = () => openModal(r);
+    grid.appendChild(card);
+  }
+}
+
+function openModal(r) {
+  document.getElementById("mImg").src = r.thumbnail;
+  document.getElementById("mBadge").textContent = r.category;
+  document.getElementById("mName").textContent = r.name;
+  document.getElementById("mLink").href = r.url;
+  document.getElementById("mCaption").textContent = r.caption;
+  document.getElementById("modalBack").classList.add("open");
+}
+
+function closeModal() { document.getElementById("modalBack").classList.remove("open"); }
+document.getElementById("close").onclick = closeModal;
+document.getElementById("modalBack").onclick = (e) => { if (e.target.id === "modalBack") closeModal(); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Private docs / scraping scripts / local dev helpers
+CLAUDE.md
+.claude/
+build_reels_json.py
+mh_reels_raw.json
+serve.py
+
+# OS / editor
+.DS_Store
+*.swp
