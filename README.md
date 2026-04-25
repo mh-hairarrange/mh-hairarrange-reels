@@ -2,7 +2,7 @@
 
 [@mh_hairarrange](https://www.instagram.com/mh_hairarrange) に投稿されたリール **226本** を10カテゴリで閲覧できる簡易ビューワです。
 
-🌐 **公開URL**: https://rockinpampiv-blip.github.io/mh-hairarrange-reels/
+🌐 **公開URL**: https://mh-hairarrange.github.io/mh-hairarrange-reels/
 
 ## カテゴリ (10種)
 
