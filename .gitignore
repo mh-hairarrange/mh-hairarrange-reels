@@ -5,6 +5,16 @@ build_reels_json.py
 mh_reels_raw.json
 serve.py
 
+# Scraping artifacts (regenerated each run)
+batch*_codes.json
+batch*_meta.json
+batch*_processed.json
+scraped_codes.json
+incoming/
+upload_server.py
+multicat_candidates.json
+quick_candidates.json
+
 # OS / editor
 .DS_Store
 *.swp
