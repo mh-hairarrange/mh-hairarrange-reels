@@ -435,10 +435,48 @@
     color: var(--text-soft);
     font-size: 14px;
   }
+
+  /* Instagram in-app browser warning */
+  .ig-warning {
+    background: linear-gradient(135deg, #FFE0D5 0%, #FFD4C4 100%);
+    border-radius: 16px;
+    padding: 14px 38px 14px 16px;
+    margin: 14px 0 4px;
+    position: relative;
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(232, 121, 90, 0.18);
+  }
+  .ig-warning strong {
+    color: var(--accent);
+    font-weight: 900;
+  }
+  .ig-warning-close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-soft);
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    font-family: inherit;
+  }
+  .ig-warning-close:hover { color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="app">
+
+  <!-- Instagram in-app browser warning -->
+  <div class="ig-warning" id="igWarning" hidden>
+    📱 Instagramアプリ内では動画ページがうまく開かないことがあります。<br>
+    画面右上「⋯」→「<strong>外部ブラウザで開く</strong>」を選ぶと、Safariなどで快適に見られます
+    <button class="ig-warning-close" id="igWarningClose" aria-label="閉じる">×</button>
+  </div>
 
   <!-- Screen 1: Category -->
   <section class="screen active" id="screen1">
@@ -515,8 +553,21 @@ async function boot() {
   document.getElementById("loading").remove();
   renderCategories();
   bindBackButtons();
+  setupIGWarning();
   handleHash();
   window.addEventListener("hashchange", handleHash);
+}
+
+function setupIGWarning() {
+  const isIGBrowser = /Instagram/i.test(navigator.userAgent);
+  const dismissed = sessionStorage.getItem("igWarningDismissed") === "1";
+  const el = document.getElementById("igWarning");
+  if (!el) return;
+  if (isIGBrowser && !dismissed) el.hidden = false;
+  document.getElementById("igWarningClose").addEventListener("click", () => {
+    el.hidden = true;
+    try { sessionStorage.setItem("igWarningDismissed", "1"); } catch (e) {}
+  });
 }
 
 function renderCategories() {
